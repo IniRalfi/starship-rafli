@@ -1,0 +1,401 @@
+# ======================================================
+# STARSHIP: ABSOLUTE ZENITH EDITION v3.1 (OPTIMIZED)
+# CachyOS + Hyprland + foot terminal + JetBrains Mono NF
+# ======================================================
+
+add_newline = true
+continuation_prompt = "[  ▹ ](#6272A4)"
+
+format = """
+[╭─](bold #00E8C6)\
+${custom.ssh_alert}\
+$os$username\
+$shlvl\
+$directory\
+$git_branch$git_state$git_status$git_metrics\
+${custom.git_health}\
+$c$golang$java$nodejs$python$rust$zig$ruby$php$swift$kotlin\
+$docker_context$kubernetes$terraform$pulumi\
+${custom.direnv}\
+${custom.ambient}
+[╰─](bold #00E8C6)\
+$cmd_duration\
+$jobs$sudo\
+${custom.exit_signal}\
+$shell\
+$character"""
+
+right_format = """\
+${custom.vpn}\
+${custom.hyprws}\
+${custom.pkgupdates}\
+${custom.cputemp}\
+${custom.localip}\
+$memory_usage$battery$time"""
+
+# ======================================================
+# SYSTEM & IDENTITAS
+# ======================================================
+[os]
+disabled = false
+format   = "[$symbol]($style)"
+style    = "bold #00E8C6"
+
+[os.symbols]
+CachyOS = "󰣇 "
+Arch    = "󰣇 "
+Ubuntu  = " "
+Debian  = " "
+Fedora  = " "
+NixOS   = " "
+Macos   = " "
+Windows = " "
+
+[username]
+style_user  = "bold #F1FA8C"
+style_root  = "bold #FF5555"
+format      = "[⭘ $user]($style) "
+disabled    = false
+show_always = true
+
+# ── SSH Alert ─────────────────────────────────────────
+[custom.ssh_alert]
+command = "echo '⚠ SSH'"
+when    = "test -n \"$SSH_CONNECTION\""
+symbol  = ""
+style   = "bold #FF5555"
+format  = "[$output ]($style)"
+
+# ── SHLVL depth (Menggunakan Native Module) ───────────
+[shlvl]
+disabled = false
+format = "[$symbol$shlvl]($style) "
+symbol = "▸"
+style = "bold #FF79C6"
+threshold = 2
+
+# ======================================================
+# DIRECTORY
+# ======================================================
+[directory]
+home_symbol       = "⌂"
+truncation_length = 3
+truncation_symbol = "□ /"
+read_only         = " ◈"
+use_os_path_sep   = true
+style             = "bold #8BE9FD"
+format            = '[$path ]($style)[$read_only]($read_only_style)'
+repo_root_style   = "bold #50FA7B"
+repo_root_format  = '[$before_root_path]($before_repo_root_style)[$repo_root]($repo_root_style)[$path ]($style)[$read_only]($read_only_style) [△](#BD93F9) '
+
+# ── Ambient Context Detector ──────────────────────────
+[custom.ambient]
+command = '''
+case "$PWD" in
+  /etc*)     echo "⚡ /etc — system config" ;;
+  /root*)    echo "⚡ ROOT HOME" ;;
+  /proc*)    echo "⚡ /proc — live kernel" ;;
+  /sys*)     echo "⚡ /sys — sysfs" ;;
+  /usr/lib*) echo "⚡ system libs" ;;
+esac
+'''
+when   = "true"
+symbol = ""
+style  = "bold #FF5555"
+format = "[$output ]($style)"
+
+# ======================================================
+# EKSEKUSI & PROMPT
+# ======================================================
+[character]
+format                    = "$symbol "
+success_symbol            = "[◎](bold #50FA7B)"
+error_symbol              = "[○](bold #FF5555)"
+vimcmd_symbol             = "[■](bold #BD93F9)"
+vimcmd_replace_one_symbol = "[◌](bold #BD93F9)"
+vimcmd_replace_symbol     = "[□](bold #BD93F9)"
+vimcmd_visual_symbol      = "[▼](bold #F1FA8C)"
+
+[status]
+disabled = true
+
+# ── Exit Code → Signal Name ───────────────────────────
+[custom.exit_signal]
+command = '''
+case $status in
+  129) echo "✕ SIGHUP"  ;; 130) echo "✕ SIGINT"  ;;
+  131) echo "✕ SIGQUIT" ;; 132) echo "✕ SIGILL"  ;;
+  133) echo "✕ SIGTRAP" ;; 134) echo "✕ SIGABRT" ;;
+  135) echo "✕ SIGBUS"  ;; 136) echo "✕ SIGFPE"  ;;
+  137) echo "✕ SIGKILL" ;; 139) echo "✕ SIGSEGV" ;;
+  141) echo "✕ SIGPIPE" ;; 143) echo "✕ SIGTERM" ;;
+  *)   echo "✕ ERR:$status" ;;
+esac
+'''
+when   = "test \"$status\" -ne 0"
+symbol = ""
+style  = "bold #FF5555"
+format = "[$output ]($style)"
+
+# ── Command Duration (Menggunakan Native Module) ──────
+[cmd_duration]
+disabled = false
+format   = "[◄ $duration]($style) "
+style    = "italic #FFB86C"
+min_time = 500
+
+[sudo]
+format   = "[$symbol]($style)"
+style    = "bold #FF79C6"
+symbol   = "⋈┈ "
+disabled = false
+
+[jobs]
+format = "[$symbol$number]($style) "
+style  = "bold #F8F8F2"
+symbol = "[▶](bold #8BE9FD)"
+
+[shell]
+fish_indicator       = ""
+bash_indicator       = "[bash](bold #FF79C6) "
+zsh_indicator        = "[zsh](bold #BD93F9) "
+powershell_indicator = "[pwsh](bold #8BE9FD) "
+unknown_indicator    = "[shell?](bold #FF5555) "
+format               = "[$indicator]($style)"
+style                = "bold #FFB86C"
+disabled             = false
+
+# ======================================================
+# MONITORING HARDWARE (Right Bar)
+# ======================================================
+
+[custom.vpn]
+command = '''
+vpn=""
+ip link show wg0 2>/dev/null | grep -q "UP" && vpn="wg"
+ip link show tun0 2>/dev/null | grep -q "UP" && vpn="${vpn:+$vpn/}ovpn"
+test -n "$vpn" && echo "󰖂 VPN:$vpn" || echo "󰖂 off"
+'''
+when   = "true"
+symbol = ""
+style  = "bold #6272A4"
+format = "[$output ]($style)"
+
+[custom.hyprws]
+# Dioptimasi: Hanya panggil hyprctl 1x dan parse dengan awk agar super ringan
+command = '''
+hyprctl activeworkspace -j 2>/dev/null | awk -F': ' '/"id"/ {id=$2; sub(/,.*/, "", id)} /"windows"/ {win=$2; sub(/,.*/, "", win)} END {if(id!="") print "󱂬 ws" id "[" win "]"}'
+'''
+when   = "command -v hyprctl >/dev/null 2>&1"
+symbol = ""
+style  = "bold #BD93F9"
+format = "[$output ]($style)"
+
+[custom.pkgupdates]
+# Dioptimasi: Hanya cek local database via pacman -Qu. checkupdates dimatikan karena butuh koneksi internet (bikin terminal ngelag).
+command = '''
+aur=$(paru -Qua 2>/dev/null | wc -l)
+pac=$(pacman -Qu 2>/dev/null | wc -l)
+total=$((aur + pac))
+test "$total" -eq 0 && echo "󰚰 synced" || echo "󰚰 ${total} upd"
+'''
+when   = "command -v paru >/dev/null 2>&1"
+symbol = ""
+style  = "bold #50FA7B"
+format = "[$output ]($style)"
+
+[custom.cputemp]
+command = "sensors 2>/dev/null | awk '/^Tctl:/ {gsub(/\\+/,\"\",$2); print $2}'"
+when    = "command -v sensors >/dev/null 2>&1"
+symbol  = " "
+style   = "bold #FFB86C"
+format  = "[$symbol$output ]($style)"
+
+[custom.localip]
+command = "ip -4 addr show wlan0 2>/dev/null | grep -oP '(?<=inet )[\\d.]+' | head -1 || echo 'no ip'"
+when    = "true"
+symbol  = "󰩠 "
+style   = "italic #6272A4"
+format  = "[$symbol$output ]($style)"
+
+[memory_usage]
+disabled  = false
+threshold = -1
+symbol    = "▪▫▪ "
+format    = "[ $symbol${ram} ](bold #6272A4)"
+
+[battery]
+format             = "[ $percentage% $symbol ]($style)"
+full_symbol        = "█"
+charging_symbol    = "[↑](bold #50FA7B)"
+discharging_symbol = "↓"
+unknown_symbol     = "░"
+empty_symbol       = "▃"
+
+[[battery.display]]
+threshold = 20
+style     = "bold #FF5555"
+
+[[battery.display]]
+threshold = 40
+style     = "bold #FFB86C"
+
+[[battery.display]]
+threshold = 70
+style     = "bold #F1FA8C"
+
+[[battery.display]]
+threshold = 99
+style     = "bold #50FA7B"
+
+[time]
+disabled        = false
+format          = "[  $time ](bold #F8F8F2)"
+time_format     = "%H:%M"
+utc_time_offset = "local"
+
+# ======================================================
+# GIT INTEGRATION
+# ======================================================
+[git_branch]
+format            = "[$symbol $branch(:$remote_branch) ]($style)"
+symbol            = "△"
+style             = "bold #FF79C6"
+truncation_symbol = "⋯"
+truncation_length = 20
+only_attached     = true
+
+[git_metrics]
+format            = '([▴$added]($added_style))([▿$deleted]($deleted_style)) '
+added_style       = 'bold #50FA7B'
+deleted_style     = 'bold #FF5555'
+ignore_submodules = true
+disabled          = false
+
+[git_status]
+style      = "bold #BD93F9"
+format     = "([⎪$ahead_behind$staged$modified$untracked$renamed$deleted$conflicted$stashed⎥]($style)) "
+conflicted = "[◪◦](bold #FF79C6)"
+ahead      = "[▴│[${count}](#F8F8F2)│](bold #50FA7B)"
+behind     = "[▿│[${count}](#F8F8F2)│](bold #FF5555)"
+diverged   = "[◇ ▴┤[${ahead_count}](#F8F8F2)│▿┤[${behind_count}](#F8F8F2)│](bold #FF79C6)"
+untracked  = "[◌◦](bold #F1FA8C)"
+stashed    = "[◃◈](bold #F8F8F2)"
+modified   = "[●◦](bold #F1FA8C)"
+staged     = "[▪┤[$count](#F8F8F2)│](bold #8BE9FD)"
+renamed    = "[◎◦](bold #BD93F9)"
+deleted    = "[✕](bold #FF5555)"
+
+# ── Git Health Score ──────────────────────────────────
+[custom.git_health]
+# Dioptimasi: Hanya panggil git status 1x dan simpan ke variabel, lalu hitung. Jauh lebih ringan!
+command = '''
+out=$(git status --porcelain 2>/dev/null)
+untracked=$(echo "$out" | grep -c "^??")
+modified=$(echo "$out" | grep -c "^ M\|^M ")
+staged=$(echo "$out" | grep -c "^[MADRC]")
+total=$((untracked + modified + staged))
+if test $total -eq 0; then
+  echo "▰▰▰▰▰ clean"
+elif test $total -le 2; then
+  echo "▱▰▰▰▰ ($total)"
+elif test $total -le 5; then
+  echo "▱▱▰▰▰ ($total)"
+elif test $total -le 10; then
+  echo "▱▱▱▰▰ ($total)"
+elif test $total -le 20; then
+  echo "▱▱▱▱▰ ($total)"
+else
+  echo "▱▱▱▱▱ ($total!!)"
+fi
+'''
+when   = "git rev-parse --git-dir >/dev/null 2>&1"
+symbol = "◈ "
+style  = "bold #BD93F9"
+format = "[$symbol$output ]($style)"
+
+# ── direnv / .env Active Detector ────────────────────
+[custom.direnv]
+command = '''
+test -n "$DIRENV_DIR" && echo "󱙳 env:$(basename $DIRENV_DIR)" || echo "󱙳 .env"
+'''
+when   = "test -n \"$DIRENV_DIR\" || test -f .env"
+symbol = ""
+style  = "bold #50FA7B"
+format = "[$output ]($style)"
+
+# ======================================================
+# TECH STACKS
+# ======================================================
+[python]
+symbol            = "[⌉](#8BE9FD)⌊ "
+format            = "[py](italic) [${symbol}${version}](bold #F1FA8C)[ (${virtualenv})](bold #50FA7B) "
+version_format    = "${raw}"
+detect_files      = ["pyproject.toml", "requirements.txt", ".python-version", "setup.py", "setup.cfg", "Pipfile"]
+detect_extensions = ["py"]
+
+[nodejs]
+symbol         = "◫ "
+format         = "[node](italic) [$symbol($version)](bold #50FA7B) "
+version_format = "${raw}"
+detect_files   = ["package.json", ".node-version", ".nvmrc"]
+
+[rust]
+symbol         = "⊃ "
+format         = "[rs](italic) [$symbol$version](bold #FF5555) "
+version_format = "${raw}"
+
+[golang]
+symbol = "∩ "
+format = "[go](italic) [$symbol($version)](bold #8BE9FD) "
+
+[java]
+symbol = "∪ "
+format = "[java](italic) [${symbol}(${version})](bold #FF5555) "
+
+[c]
+symbol = "∁ "
+format = "[c](italic) [$symbol($version(-$name))](bold #8BE9FD) "
+
+[zig]
+symbol = "⚡ "
+format = "[zig](italic) [$symbol($version)](bold #F1FA8C) "
+
+[ruby]
+symbol = "◆ "
+format = "[rb](italic) [$symbol($version)](bold #FF5555) "
+
+[php]
+symbol = "󰌟 "
+format = "[php](italic) [$symbol($version)](bold #BD93F9) "
+
+[swift]
+symbol = "󰛥 "
+format = "[swift](italic) [$symbol($version)](bold #FF79C6) "
+
+[kotlin]
+symbol = "󱈙 "
+format = "[kt](italic) [$symbol($version)](bold #BD93F9) "
+
+[docker_context]
+symbol          = "◧ "
+format          = "[docker](italic) [$symbol$context](bold #8BE9FD) "
+only_with_files = true
+
+[kubernetes]
+symbol            = "☸ "
+format            = "[k8s](italic) [$symbol$context(\\($namespace\\))](bold #00E8C6) "
+disabled          = false
+detect_files      = ["helmfile.yaml"]
+detect_folders    = [".kube", "helm"]
+detect_extensions = []
+
+[terraform]
+symbol            = "󱁢 "
+format            = "[tf](italic) [$symbol$workspace](bold #BD93F9) "
+detect_files      = [".terraform", "terraform.tfstate"]
+detect_extensions = ["tf"]
+
+[pulumi]
+symbol = " "
+format = "[pulumi](italic) [$symbol($username@)$stack](bold #8BE9FD) "
